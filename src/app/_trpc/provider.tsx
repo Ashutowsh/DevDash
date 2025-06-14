@@ -12,7 +12,7 @@ export const TRPCProvider = ({children} : {children : React.ReactNode}) => {
   const [trpcClient] = useState(() => trpc.createClient({
     links: [
         httpBatchLink({
-            url: `${process.env.NEXT_PUBLIC_TRPC_URL}`,
+            url: `${process.env.NEXT_PUBLIC_TRPC_API_URL}`,
         })
     ]
   }))

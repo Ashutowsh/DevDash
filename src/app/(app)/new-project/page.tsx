@@ -19,22 +19,12 @@ import { z } from "zod"
 import { projectSchema } from '@/schemas/projectSchema'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
-// import { useProject } from '@/hooks/use-project'
+import { useRefresh } from '@/hooks/use-refetch'
 
 const NewProjectPage = () => {
-//   const {getProjects} = useProject()
-//   const createProject = trpc.createProject.useMutation({
-//     onSuccess : () => {
-//       toast.success("Project created successfully.")
-//       getProjects.refetch()
-//       form.reset()
-//     },
 
-//     onError : () => {
-//       toast.error("Failed to create project.")
-//     },
-//   });
-  
+  const newProject = trpc.newProject.useMutation()
+
   const form = useForm<z.infer<typeof projectSchema>>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -44,10 +34,24 @@ const NewProjectPage = () => {
     }
   })
 
+  const refetch = useRefresh()
+
 
   function onSubmit(values: z.infer<typeof projectSchema>) {
-    // console.log(values)
-    // createProject.mutate(values)
+    newProject.mutate({
+      githubUrl: values.githubUrl,
+      projectTitle: values.projectTitle,
+      githubToken: values.githubToken
+    },{
+      onSuccess: () => {
+        toast.success("Project created successfully!")
+        refetch()
+        form.reset()
+      },
+      onError: () => {
+        toast.error("Failed to create project. Please try again.")
+      }
+    })
   }
 
 
@@ -105,7 +109,7 @@ const NewProjectPage = () => {
                     </FormItem>
                 )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={newProject.isPending}>Submit</Button>
             </form>
           </Form>
         </div>

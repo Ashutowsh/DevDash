@@ -1,16 +1,19 @@
 'use client'
 import React from 'react'
-import { Sidebar, SidebarHeader, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton, SidebarMenu } from './ui/sidebar'
-import { projects, sidebarItems } from '@/constants'
+import { Sidebar, SidebarHeader, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton, SidebarMenu, useSidebar } from './ui/sidebar'
+import {sidebarItems } from '@/constants'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { Button } from './ui/button'
 import { Plus } from 'lucide-react'
+import { useProject } from '@/hooks/use-project'
 
 
 export const AppSideBar = () => {
     const pathname = usePathname()
+    const {open} = useSidebar()
+    const {projects, projectId, setProjectId} = useProject()
   return (
     <div>
       <Sidebar collapsible='icon' variant='floating'>
@@ -47,16 +50,18 @@ export const AppSideBar = () => {
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
                     <SidebarMenu>
-                        {projects.map(project => (
-                            <SidebarMenuItem key={project.name}>
+                        {projects?.map(project => (
+                            <SidebarMenuItem key={project.title}>
                                 <SidebarMenuButton asChild>
-                                    <div>
+                                    <div onClick={() => {
+                                        setProjectId(project.id)
+                                    }}>
                                         <div className= {cn('rounded-sm border size-6 flex items-center justify-center text-sm bg-white text-primary', {
-                                            'bg-primary text-white': true
+                                            'bg-primary text-white': project.id === projectId
                                         })}>
-                                            {project.name[0]}
+                                            {project.title[0]}
                                         </div>
-                                        <span>{project.name}</span>
+                                        <span>{project.title}</span>
                                     </div>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
