@@ -28,18 +28,18 @@ export const AppSideBar = () => {
                 </SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu>
-                                    {sidebarItems.map(item => (
-                    <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                            <Link href={item.url} className={cn({
-                                '|bg-primary |text-white': pathname === item.url
-                            }, 'list-none')}>
-                                <item.icon />
-                                <span>{item.title}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
+                    {sidebarItems.map(item => (
+                        <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton asChild>
+                                <Link href={item.url} className={cn({
+                                    'bg-primary text-white': pathname === item.url
+                                }, 'list-none')}>
+                                    <item.icon />
+                                    <span>{item.title}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
                 </SidebarMenu>
             </SidebarGroupContent>
             </SidebarGroup>
