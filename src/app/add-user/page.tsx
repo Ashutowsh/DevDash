@@ -27,7 +27,6 @@ const AddUser = async() =>  {
                 id: user.id,
                 email: user.emailAddresses[0].emailAddress,
                 imageUrl: user.imageUrl,
-                username: user.username ?? "",
                 firstName: user.firstName,
                 lastName: user.lastName,
             },
