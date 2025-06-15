@@ -1,6 +1,8 @@
 import { projectSchema } from "@/schemas/projectSchema";
 import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
+import { pollCommits } from "@/lib/github";
+import { z } from "zod";
 
 export const appRouter = router({
     newProject: protectedProcedures.input(projectSchema).mutation(async({ctx, input}) => {
@@ -17,6 +19,8 @@ export const appRouter = router({
                 }
             }
         })
+
+        await pollCommits(project.id)
         return project
     }),
 
@@ -29,6 +33,17 @@ export const appRouter = router({
                     }
                 },
                 deletedAt: null
+            }
+        })
+    }),
+
+    getCommits: protectedProcedures.input(z.object({
+        projectId: z.string()
+    })).query(async({ctx, input}) => {
+        await pollCommits(input.projectId).then().catch(console.error)
+        return await prismaDb.commit.findMany({
+            where: {
+                projectId: input.projectId,
             }
         })
     })

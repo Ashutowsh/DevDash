@@ -1,11 +1,15 @@
+import { diffAnalyzerMediumPrompt } from "@/constants";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: "YOUR_API_KEY" });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 export const aiSummarise = async (diff: string) => {
+
     const response = await ai.models.generateContent({
     model: "gemini-2.0-flash",
-    contents: "Explain how AI works in a few words",
+    contents: diffAnalyzerMediumPrompt + diff,
   });
-  console.log(response.text);
+
+  // console.log("AI Response:", response.text);
+  return response.text
 }

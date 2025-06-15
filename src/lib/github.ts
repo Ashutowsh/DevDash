@@ -1,5 +1,7 @@
 import {Octokit} from "octokit";
 import prismaDb from "./prisma";
+import axios from "axios";
+import { aiSummarise } from "./ai";
 
 export const octokit = new Octokit({
     auth : process.env.GITHUB_TOKEN,
@@ -10,7 +12,7 @@ type CommitResponse = {
     commitMessage : string,
     commitAuthorName : string,
     commitAuthorAvatar: string,
-    commitData: string
+    commitDate: string
 }
 
 const fetchProjectGithubUrl = async (projectId : string) => {
@@ -55,8 +57,35 @@ const pollCommits = async(projectId: string) => {
     const {project, githubUrl} = await fetchProjectGithubUrl(projectId)
     const commitHashes = await getCommitHashes(githubUrl)
     const unprocessedCommits = await filterunprocessedCommits(projectId, commitHashes)
-    console.log(unprocessedCommits)
-    return unprocessedCommits
+    
+    const summaryResponse = await Promise.allSettled(unprocessedCommits.map((commit)=> {
+        return summariseCommit(githubUrl, commit.commitHash)
+    }))
+
+    const summaries = summaryResponse.map((response) => {
+        if(response.status === 'fulfilled') {
+            return response.value as string
+        }
+        return ""
+    })
+
+    const commits = await prismaDb.commit.createMany({
+        data: summaries.map((summary, index) => {
+            console.log("Processing commit : ", index)
+            return {
+                projectId: projectId,
+                commitHash : unprocessedCommits[index]!.commitHash,
+                commitMessage: unprocessedCommits[index]!.commitMessage,
+                commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+                commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+                commitDate: unprocessedCommits[index]!.commitDate,
+                summary,
+            }
+        })
+    })
+    
+
+    return commits
 }
 
 const filterunprocessedCommits = async(projectId: string, commitHashes: CommitResponse[]) => {
@@ -66,4 +95,18 @@ const filterunprocessedCommits = async(projectId: string, commitHashes: CommitRe
 
     const unprocessedCommits = commitHashes.filter((commit) => !processedCommit.some((processedCommit) => processedCommit.commitHash === commit.commitHash))
     return unprocessedCommits
+}
+
+const summariseCommit = async(githubUrl: string, commitHash: string) => {
+    const {data} = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+        headers : {
+            Accept : 'application/vnd.github.v3.diff'
+        }
+    })
+
+    return aiSummarise(data) || ""
+}
+
+export {
+    pollCommits
 }

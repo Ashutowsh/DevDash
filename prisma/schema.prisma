@@ -68,7 +68,7 @@ model Commit {
   commitHash         String
   commitAuthorName   String
   commitAuthorAvatar String
-  commitData         DateTime
+  commitDate        DateTime
   summary            String
 
   createdAt DateTime @default(now())
