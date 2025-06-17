@@ -42,7 +42,27 @@ export const generateEmbedding = async(summary: string) => {
   const response = await ai.models.embedContent({
     model: 'text-embedding-004',
     contents: summary,
+    config:{
+      taskType: 'SEMANTIC_SIMILARITY'
+    }
   });
 
   return response.embeddings
+}
+
+export async function streamGeminiResponse({
+  prompt,
+  onChunk,
+}: {
+  prompt: string;
+  onChunk: (chunk: string) => void;
+}) {
+  const response = await ai.models.generateContentStream({
+    model: "gemini-1.5-flash",
+    contents: prompt,
+  });
+
+  for await (const chunk of response) {
+    onChunk(chunk.text || ""); // ensure safe string
+  }
 }
