@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-export const useRefresh = () => {
+export const useRefetch = () => {
     const queryClient = useQueryClient();
     return async () => {
         await queryClient.refetchQueries({

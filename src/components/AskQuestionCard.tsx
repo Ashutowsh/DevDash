@@ -11,6 +11,9 @@ import { readStreamableValue } from 'ai/rsc'
 import MDEditor from '@uiw/react-md-editor'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import RelatedCodes from './RelatedCodes'
+import { trpc } from '@/app/_trpc/client'
+import { toast } from 'sonner'
+import { useRefetch } from '@/hooks/use-refetch'
 
 function AskQuestionCard() {
     const {project} = useProject()
@@ -19,6 +22,9 @@ function AskQuestionCard() {
     const [loading, setLoading] = useState(false)
     const [fileReferences, setFileReferences] = useState<{fileName: string, summary: string, sourceCode: string}[]>()
     const [answer, setAnswer] = useState('')
+    const savedQnA = trpc.saveQnA.useMutation()
+
+    const refetch = useRefetch()
 
     const onSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -43,9 +49,29 @@ function AskQuestionCard() {
         <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-[90vw] max-w-5xl sm:w-[80vw] sm:max-w-4xl md:w-[70vw] md:max-w-3xl">
             <DialogHeader>
-            <DialogTitle>
-                {/* Optional Title or Image */}
-            </DialogTitle>
+                <div className="flex items-center.gap-2">
+                    <DialogTitle>
+                    {/* Optional Title or Image */}
+                    </DialogTitle>
+                    <Button variant={'outline'} disabled ={savedQnA.isPending} onClick={() => {
+                        savedQnA.mutate({
+                            projectId: project!.id,
+                            question,
+                            answer,
+                            files: fileReferences
+                        }, {
+                            onSuccess: () => {
+                                toast.success('Answer saved successfully!')
+                                refetch()
+                            },
+                            onError: () => {
+                                toast.error('Failed to save answer!')
+                            }
+                        })
+                    }}>
+                        Save Answer
+                    </Button>
+                </div>
             </DialogHeader>
 
             <MDEditor.Markdown

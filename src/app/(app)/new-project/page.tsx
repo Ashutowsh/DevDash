@@ -19,7 +19,7 @@ import { z } from "zod"
 import { projectSchema } from '@/schemas/projectSchema'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
-import { useRefresh } from '@/hooks/use-refetch'
+import { useRefetch } from '@/hooks/use-refetch'
 
 const NewProjectPage = () => {
 
@@ -34,7 +34,7 @@ const NewProjectPage = () => {
     }
   })
 
-  const refetch = useRefresh()
+  const refetch = useRefetch()
 
 
   function onSubmit(values: z.infer<typeof projectSchema>) {

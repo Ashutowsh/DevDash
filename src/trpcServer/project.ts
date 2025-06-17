@@ -1,4 +1,4 @@
-import { projectSchema } from "@/schemas/projectSchema";
+import { projectSchema, qnASchema } from "@/schemas/projectSchema";
 import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
 import { pollCommits } from "@/lib/github";
@@ -48,6 +48,39 @@ export const appRouter = router({
                 projectId: input.projectId,
             }
         })
+    }),
+
+    saveQnA: protectedProcedures.input(qnASchema).mutation(async({ctx, input}) => {
+        const qnA = await prismaDb.question.create({
+            data: {
+                question: input.question,
+                answer: input.answer,
+                filesReferences: input.files,
+                projectId: input.projectId,
+                userId: ctx.user.userId!
+            }
+        })
+
+        return qnA
+    }),
+
+    getQnAs : protectedProcedures.input(z.object({
+        projectId: z.string()
+    })).query(async({input}) => {
+        const qnAs = await prismaDb.question.findMany({
+            where:{
+                projectId: input.projectId
+            },
+            include: {
+                user: true
+            },
+
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+
+        return qnAs
     })
 })
 
