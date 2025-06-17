@@ -41,8 +41,6 @@ const getCommitHashes = async(githubUrl : string): Promise<CommitResponse[]> => 
     })
 
     const sortedCommits = data.sort((a:any, b:any) => new Date(b.commit.author.date).getTime() - new Date(a.commit.author?.date).getTime()) as any
-
-    console.log(sortedCommits)
     
     return sortedCommits.slice(0, process.env.NO_OF_COMMITS).map((commit : any) => ({
         commitHash : commit.sha as string,

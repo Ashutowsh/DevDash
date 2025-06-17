@@ -1,5 +1,6 @@
 'use client'
 
+import AskQuestionCard from '@/components/AskQuestionCard'
 import CommitLogs from '@/components/CommitLogs'
 import { useProject } from '@/hooks/use-project'
 import { ExternalLink, Github } from 'lucide-react'
@@ -39,7 +40,7 @@ function Dashboard() {
 
         <div className="mt-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-            AskQuestionCard
+            <AskQuestionCard />
             MeetingCard
           </div>
         </div>

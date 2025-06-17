@@ -187,6 +187,7 @@ Now analyze the following Git diff and return a medium summary in the required f
 `;
 
 
+
 export {
     sidebarItems,
     projects,

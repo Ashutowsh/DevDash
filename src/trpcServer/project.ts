@@ -3,6 +3,7 @@ import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
 import { pollCommits } from "@/lib/github";
 import { z } from "zod";
+import { indexGithubRepo } from "@/lib/gitInfo";
 
 export const appRouter = router({
     newProject: protectedProcedures.input(projectSchema).mutation(async({ctx, input}) => {
@@ -19,8 +20,9 @@ export const appRouter = router({
                 }
             }
         })
-
+        await indexGithubRepo(project.id, input.githubUrl, input.githubToken!)
         await pollCommits(project.id)
+
         return project
     }),
 
