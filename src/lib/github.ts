@@ -1,7 +1,7 @@
 import {Octokit} from "octokit";
 import prismaDb from "./prisma";
 import axios from "axios";
-import { aiSummarise } from "./ai";
+import { aiCheckSecurity, aiSummarise } from "./ai";
 
 export const octokit = new Octokit({
     auth : process.env.GITHUB_TOKEN,
@@ -52,7 +52,7 @@ const getCommitHashes = async(githubUrl : string): Promise<CommitResponse[]> => 
 }
 
 const pollCommits = async(projectId: string) => {
-    const {project, githubUrl} = await fetchProjectGithubUrl(projectId)
+    const {githubUrl} = await fetchProjectGithubUrl(projectId)
     const commitHashes = await getCommitHashes(githubUrl)
     const unprocessedCommits = await filterunprocessedCommits(projectId, commitHashes)
     
@@ -77,13 +77,88 @@ const pollCommits = async(projectId: string) => {
                 commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
                 commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
                 commitDate: unprocessedCommits[index]!.commitDate,
-                summary,
+                summary: summary ?? "",
             }
         })
     })
     
-
+    
     return commits
+}
+
+export const pollCommits_01 = async (projectId: string) => {
+  // Step 1: Get unprocessed commits
+  const { githubUrl } = await fetchProjectGithubUrl(projectId)
+  const commitHashes = await getCommitHashes(githubUrl)
+  const unprocessedCommits = await filterunprocessedCommits(projectId, commitHashes)
+
+  // Step 2: Run both summary + security in parallel
+  const summaryResponse = await Promise.allSettled(
+    unprocessedCommits.map(commit => summariseCommit(githubUrl, commit.commitHash))
+  )
+
+  const scanResponse = await Promise.allSettled(
+    unprocessedCommits.map(commit => securityChecks(githubUrl, commit.commitHash))
+  )
+
+  // Step 3: Save commits using create() to get IDs
+  const createdCommits = await Promise.all(
+    summaryResponse.map((res, index) => {
+      const summary = res.status === "fulfilled" ? res.value : ""
+
+      return prismaDb.commit.create({
+        data: {
+          projectId,
+          commitHash: unprocessedCommits[index].commitHash,
+          commitMessage: unprocessedCommits[index].commitMessage,
+          commitAuthorAvatar: unprocessedCommits[index].commitAuthorAvatar,
+          commitAuthorName: unprocessedCommits[index].commitAuthorName,
+          commitDate: unprocessedCommits[index].commitDate,
+          summary: summary ?? "",
+        },
+      })
+    })
+  )
+
+  // Step 4: Save related security scans using commitId from above
+  try {
+      const scanInsertData = scanResponse
+    .map((res, index) => {
+      if (res.status === "fulfilled") {
+        const security = res.value
+        return {
+          commitId: createdCommits[index].id,
+          projectId,
+          suggestions: security.suggestions,
+          severity: security.severity,
+          fileNames: security.fileNames,
+        }
+      }
+      return null
+    })
+    .filter((item): item is {
+      commitId: string;
+      userId: string;
+      projectId: string;
+      suggestions: string;
+      severity: "CRITICAL" | "IMPORTANT" | "OK";
+      fileNames: string[];
+    } => item !== null)
+
+  if (scanInsertData.length > 0) {
+    await prismaDb.commitSecurityScan.createMany({
+      data: scanInsertData,
+      skipDuplicates: true,
+    })
+  }
+
+    return {
+    insertedCommits: createdCommits.length,
+    insertedScans: scanInsertData.length,
+  }
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const filterunprocessedCommits = async(projectId: string, commitHashes: CommitResponse[]) => {
@@ -105,6 +180,16 @@ const summariseCommit = async(githubUrl: string, commitHash: string) => {
     return aiSummarise(data) || ""
 }
 
+const securityChecks = async(githubUrl: string, commitHash: string) => {
+    const {data} = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+        headers : {
+            Accept : 'application/vnd.github.v3.diff'
+        }
+    })
+
+    return aiCheckSecurity(data) || ""
+}
+
 export {
-    pollCommits
+    pollCommits,
 }

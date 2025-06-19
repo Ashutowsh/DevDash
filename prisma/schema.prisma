@@ -51,6 +51,8 @@ model Project {
   SourceCodeEmbeddings SourceCodeEmbeddings[]
 
   Question Question[]
+
+  CommitSecurityScan CommitSecurityScan[]
 }
 
 model UsersToProjects {
@@ -81,6 +83,8 @@ model Commit {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  CommitSecurityScan CommitSecurityScan[]
 }
 
 model SourceCodeEmbeddings {
@@ -110,4 +114,24 @@ model Question {
 
   projectId String
   project Project @relation(fields: [projectId], references: [id])
+}
+
+enum SecuritySeverity {
+  CRITICAL
+  IMPORTANT
+  OK
+}
+
+model CommitSecurityScan {
+  id         String   @id @default(cuid())
+  commitId   String   @unique
+  commit Commit @relation(fields: [commitId], references: [id])
+
+  projectId String
+  project Project @relation(fields: [projectId], references: [id])
+
+  suggestions String
+  severity   SecuritySeverity
+  fileNames  String[]
+  createdAt  DateTime @default(now())
 }

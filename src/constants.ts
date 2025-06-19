@@ -1,4 +1,4 @@
-import { Bot, CreditCard, LayoutDashboard, Presentation } from "lucide-react";
+import { Bot, CreditCard, LayoutDashboard, Presentation, Lock } from "lucide-react";
 const sidebarItems = [
     {
         title: "Dashboard",
@@ -12,17 +12,23 @@ const sidebarItems = [
         icon: Bot
     }, 
 
+    // {
+    //     title: "Meetings",
+    //     url : "/meetings",
+    //     icon: Presentation
+    // },
+
     {
-        title: "Meetings",
-        url : "/meetings",
-        icon: Presentation
+        title: "Security",
+        url: "/security",
+        icon: Lock
     },
 
     {
         title: "Billing",
         url: "/billing",
         icon: CreditCard
-    }
+    },
 ]
 
 const projects = [
@@ -200,10 +206,37 @@ const streamResponse = `You are a AI code assistant who answers questions about 
         If the context does not provide the answer to question, the AI assistant will say "I'm sorry, but I don't know the answer". AI assistant will not apologise for the previous responses, but instead will indicated the new information was gained, AI assistant will not invent anything that is not drawn directly from the context.
         Answer in the markdown syntax, with code snippets if needed. Be as detailed as possible when answering.`
 
+const security_analysisPrompt = `
+You are a code security analyst.
+
+Analyze the Git commit diff provided below. Your goal is to identify whether any **security risks** were introduced in this commit, such as:
+
+- Hardcoded secrets (API keys, tokens, passwords)
+- Use of insecure functions (like \`eval\`, \`exec\`)
+- Direct SQL without sanitization
+- Exposure of credentials or configs
+
+Return a JSON object with the following schema:
+
+{
+  "severity": "CRITICAL | IMPORTANT | OK",
+  "suggestions": "<Short, human-readable suggestion or recommendation>",
+  "fileNames": ["<File1>", "<File2>", "..."]
+}
+
+Instructions:
+- If **no risk** is found, return "severity": "OK" with an empty file list and a suggestion like "No issues detected."
+- Only include files where risky code was added or modified.
+- Keep the suggestion very concise (5-6 lines max if needed).
+
+Now analyze the commit diff below:
+
+`;
 
 
 export {
     sidebarItems,
     projects,
-    diffAnalyzerMediumPrompt
+    diffAnalyzerMediumPrompt,
+    security_analysisPrompt
 }

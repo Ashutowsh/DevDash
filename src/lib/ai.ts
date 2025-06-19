@@ -1,4 +1,4 @@
-import { diffAnalyzerMediumPrompt } from "@/constants";
+import { diffAnalyzerMediumPrompt, security_analysisPrompt } from "@/constants";
 import { GoogleGenAI } from "@google/genai";
 import { Document } from "@langchain/core/documents";
 
@@ -14,6 +14,46 @@ export const aiSummarise = async (diff: string) => {
   // console.log("AI Response:", response.text);
   return response.text
 }
+
+type SecurityResult = {
+  severity: 'CRITICAL' | 'IMPORTANT' | 'OK'
+  suggestions: string
+  fileNames: string[]
+}
+
+export const aiCheckSecurity = async (diff: string): Promise<SecurityResult> => {
+  const response = await ai.models.generateContent({
+    model: 'gemini-1.5-flash',
+    contents: security_analysisPrompt + diff,
+  })
+
+  try {
+    // Remove backticks or code fences if Gemini added them
+    const cleanText = (response.text ?? '').trim().replace(/^```json/, '').replace(/```$/, '').trim()
+
+    const parsed = JSON.parse(cleanText)
+
+    if (
+      parsed &&
+      ['CRITICAL', 'IMPORTANT', 'OK'].includes(parsed.severity) &&
+      typeof parsed.suggestions === 'string' &&
+      Array.isArray(parsed.fileNames)
+    ) {
+      return parsed
+    }
+
+    throw new Error('Invalid format')
+  } catch (err) {
+    console.warn('⚠️ Failed to parse AI response:', response.text)
+
+    return {
+      severity: 'OK',
+      suggestions: 'Could not parse AI response. Defaulted to OK.',
+      fileNames: [],
+    }
+  }
+}
+
 
 export const summariseCode = async(doc: Document) => {
   console.log("Getting summary for", doc.metadata.source)

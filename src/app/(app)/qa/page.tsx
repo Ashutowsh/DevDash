@@ -55,7 +55,7 @@ function QnABot() {
               {question.question}
             </SheetTitle>
             <MDEditor.Markdown source={question.answer}/>
-            <RelatedCodes fileReferences={(question.filesReferences ?? []) as any}/>
+            <RelatedCodes fileReferences={(question.filesReferences) as any[]}/>
           </SheetHeader>
         </SheetContent>
       )}

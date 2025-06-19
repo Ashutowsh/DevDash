@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { useForm } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { projectSchema } from '@/schemas/projectSchema'
+import { projectSchema } from '@/schema'
 import { trpc } from '@/app/_trpc/client'
 import { toast } from 'sonner'
 import { useRefetch } from '@/hooks/use-refetch'

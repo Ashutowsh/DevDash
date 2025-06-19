@@ -1,9 +1,10 @@
-import { projectSchema, qnASchema } from "@/schemas/projectSchema";
+import { CommitSecurityScanSchema, projectSchema, qnASchema } from "@/schema";
 import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
-import { pollCommits } from "@/lib/github";
+import { pollCommits, pollCommits_01 } from "@/lib/github";
 import { z } from "zod";
 import { indexGithubRepo } from "@/lib/gitInfo";
+import { SecuritySeverity } from "@/generated/prisma";
 
 export const appRouter = router({
     newProject: protectedProcedures.input(projectSchema).mutation(async({ctx, input}) => {
@@ -21,7 +22,8 @@ export const appRouter = router({
             }
         })
         await indexGithubRepo(project.id, input.githubUrl, input.githubToken!)
-        await pollCommits(project.id)
+        // await pollCommits(project.id)
+        await pollCommits_01(project.id)
 
         return project
     }),
@@ -81,6 +83,23 @@ export const appRouter = router({
         })
 
         return qnAs
+    }),
+
+    getCommitSecurityScans: protectedProcedures.input(z.object({
+        projectId: z.string()
+    }))
+    .query(async({ctx, input}) => {
+        const savedScan = await prismaDb.commitSecurityScan.findMany({
+            where: {
+                projectId: input.projectId
+            },
+
+            include:{
+                commit: true
+            }
+        })
+
+        return savedScan
     })
 })
 
