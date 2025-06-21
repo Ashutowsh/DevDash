@@ -4,7 +4,7 @@ import axios from "axios";
 import { aiCheckSecurity, aiSummarise } from "./ai";
 
 export const octokit = new Octokit({
-    auth : process.env.GITHUB_TOKEN,
+  auth : process.env.GITHUB_TOKEN,
 })
 
 type CommitResponse = {
@@ -18,10 +18,10 @@ type CommitResponse = {
 const fetchProjectGithubUrl = async (projectId : string) => {
     const project = await prismaDb.project.findUnique({
         where : {
-            id : projectId
+          id : projectId
         },
         select : {
-            githubUrl : true
+          githubUrl : true
         }
     })
 
@@ -33,11 +33,11 @@ const fetchProjectGithubUrl = async (projectId : string) => {
 const getCommitHashes = async(githubUrl : string): Promise<CommitResponse[]> => {
     const [owner, repo] = githubUrl.split('/').slice(-2)
     if(!owner || !repo) {
-        throw new Error("Invalid Github url.")
+      throw new Error("Invalid Github url.")
     }
     const {data} = await octokit.rest.repos.listCommits({
-        owner,
-        repo
+      owner,
+      repo
     })
 
     const sortedCommits = data.sort((a:any, b:any) => new Date(b.commit.author.date).getTime() - new Date(a.commit.author?.date).getTime()) as any
@@ -51,48 +51,11 @@ const getCommitHashes = async(githubUrl : string): Promise<CommitResponse[]> => 
     }))
 }
 
-const pollCommits = async(projectId: string) => {
-    const {githubUrl} = await fetchProjectGithubUrl(projectId)
-    const commitHashes = await getCommitHashes(githubUrl)
-    const unprocessedCommits = await filterunprocessedCommits(projectId, commitHashes)
-    
-    const summaryResponse = await Promise.allSettled(unprocessedCommits.map((commit)=> {
-        return summariseCommit(githubUrl, commit.commitHash)
-    }))
-
-    const summaries = summaryResponse.map((response) => {
-        if(response.status === 'fulfilled') {
-            return response.value as string
-        }
-        return ""
-    })
-
-    const commits = await prismaDb.commit.createMany({
-        data: summaries.map((summary, index) => {
-            console.log("Processing commit : ", index)
-            return {
-                projectId: projectId,
-                commitHash : unprocessedCommits[index]!.commitHash,
-                commitMessage: unprocessedCommits[index]!.commitMessage,
-                commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
-                commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
-                commitDate: unprocessedCommits[index]!.commitDate,
-                summary: summary ?? "",
-            }
-        })
-    })
-    
-    
-    return commits
-}
-
-export const pollCommits_01 = async (projectId: string) => {
-  // Step 1: Get unprocessed commits
+export const pollCommits = async (projectId: string) => {
   const { githubUrl } = await fetchProjectGithubUrl(projectId)
   const commitHashes = await getCommitHashes(githubUrl)
   const unprocessedCommits = await filterunprocessedCommits(projectId, commitHashes)
 
-  // Step 2: Run both summary + security in parallel
   const summaryResponse = await Promise.allSettled(
     unprocessedCommits.map(commit => summariseCommit(githubUrl, commit.commitHash))
   )
@@ -101,7 +64,6 @@ export const pollCommits_01 = async (projectId: string) => {
     unprocessedCommits.map(commit => securityChecks(githubUrl, commit.commitHash))
   )
 
-  // Step 3: Save commits using create() to get IDs
   const createdCommits = await Promise.all(
     summaryResponse.map((res, index) => {
       const summary = res.status === "fulfilled" ? res.value : ""
@@ -120,9 +82,7 @@ export const pollCommits_01 = async (projectId: string) => {
     })
   )
 
-  // Step 4: Save related security scans using commitId from above
-  try {
-      const scanInsertData = scanResponse
+    const scanInsertData = scanResponse
     .map((res, index) => {
       if (res.status === "fulfilled") {
         const security = res.value
@@ -152,12 +112,9 @@ export const pollCommits_01 = async (projectId: string) => {
     })
   }
 
-    return {
+  return {
     insertedCommits: createdCommits.length,
     insertedScans: scanInsertData.length,
-  }
-  } catch (error) {
-    console.log(error)
   }
 }
 
@@ -188,8 +145,4 @@ const securityChecks = async(githubUrl: string, commitHash: string) => {
     })
 
     return aiCheckSecurity(data) || ""
-}
-
-export {
-    pollCommits,
 }

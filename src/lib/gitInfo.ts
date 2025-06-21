@@ -21,7 +21,6 @@ const loadGithubRepo = async (githubUrl: string, githubToken?: string) => {
 const indexGithubRepo = async(projectId: string, githubUrl: string, githubToken?: string) => {
     const docs = await loadGithubRepo(githubUrl, githubToken)
     const allEmbeddings = await generateEmbeddings(docs)
-    console.log("Hello")
     await Promise.allSettled(allEmbeddings.map(async (embedding, index) => {
         console.log(`processing ${index} of ${allEmbeddings.length}`)
         if(!embedding) return

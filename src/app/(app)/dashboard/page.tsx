@@ -1,9 +1,13 @@
 'use client'
 
+import ArchiveButton from '@/components/ArchiveButton'
 import AskQuestionCard from '@/components/AskQuestionCard'
 import CommitLogs from '@/components/CommitLogs'
+const InviteButton = dynamic(() => import('../../../components/InviteButton'), {ssr: false})
+import TeamMembers from '@/components/TeamMembers'
 import { useProject } from '@/hooks/use-project'
 import { ExternalLink, Github } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import React from 'react'
 
@@ -31,9 +35,9 @@ function Dashboard() {
           <div className='h-4'></div>
 
           <div className='flex items-center gap-4'>
-            TeamMembers
-            InviteButton
-            ArchiveButton
+            <TeamMembers />
+            <InviteButton />
+            <ArchiveButton />
           </div>
         </div>
 

@@ -1,10 +1,9 @@
-import { CommitSecurityScanSchema, projectSchema, qnASchema } from "@/schema";
+import {projectSchema, qnASchema } from "@/schema";
 import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
-import { pollCommits, pollCommits_01 } from "@/lib/github";
+import {pollCommits } from "@/lib/github";
 import { z } from "zod";
 import { indexGithubRepo } from "@/lib/gitInfo";
-import { SecuritySeverity } from "@/generated/prisma";
 
 export const appRouter = router({
     newProject: protectedProcedures.input(projectSchema).mutation(async({ctx, input}) => {
@@ -23,7 +22,7 @@ export const appRouter = router({
         })
         await indexGithubRepo(project.id, input.githubUrl, input.githubToken!)
         // await pollCommits(project.id)
-        await pollCommits_01(project.id)
+        await pollCommits(project.id)
 
         return project
     }),
@@ -100,6 +99,25 @@ export const appRouter = router({
         })
 
         return savedScan
+    }),
+
+    archiveProject: protectedProcedures.input(z.object({
+        projectId : z.string()
+    })).mutation(async({input}) => {
+        return await prismaDb.project.update({
+            where: { id: input.projectId},
+            data: {
+                deletedAt: new Date()
+            }
+        })
+    }),
+
+    getTeamMembers: protectedProcedures.input(z.object({
+        projectId: z.string()
+    })).query(async({ctx, input}) => {
+        return prismaDb.usersToProjects.findMany({
+            where: {projectId: input.projectId}, include: {user:true}
+        })
     })
 })
 

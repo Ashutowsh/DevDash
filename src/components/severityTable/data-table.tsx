@@ -22,6 +22,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "../ui/input"
+import { AuthorCombobox } from "./author-combobox"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 interface DataTableProps<TData, TValue> {
@@ -36,6 +45,13 @@ export function DataTable<TData, TValue>({
     
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [selectedSeverity, setSelectedSeverity] = useState<string>("")
+
+    const handleSelect = (value: string) => {
+        setSelectedSeverity(value)
+        table.getColumn("severity")?.setFilterValue(value)
+    }
+
   
     const table = useReactTable({
     data,
@@ -54,12 +70,36 @@ export function DataTable<TData, TValue>({
   return (
     <div>
         <div className="flex items-center py-4">
-            <Input 
-            placeholder="Filter severity..."
-            value={(table.getColumn("severity")?.getFilterValue() as string) ?? ""}
-            onChange={(e) => table.getColumn("severity")?.setFilterValue(e.target.value)}
-            className="max-w-sm"
-            />
+            <div className="mr-3.5">
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <Input 
+                            placeholder="Filter severity..."
+                            value={selectedSeverity}
+                            onChange={(e) => {
+                                const val = e.target.value
+                                setSelectedSeverity(val)
+                                table.getColumn("severity")?.setFilterValue(val)
+                            }}
+                            className="max-w-sm mr-3 cursor-pointer"
+                            readOnly
+                        />
+                    </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>Select severity status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                                <DropdownMenuItem onSelect={() => handleSelect("")}>
+                                    ALL
+                                </DropdownMenuItem>
+                                {["CRITICAL", "IMPORTANT", "OK"].map((level) => (
+                                <DropdownMenuItem key={level} onSelect={() => handleSelect(level)}>
+                                    {level}
+                                </DropdownMenuItem>
+                                ))}
+                        </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <AuthorCombobox/>
         </div>
         <div className="rounded-md border">
         <Table>
