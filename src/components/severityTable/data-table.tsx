@@ -101,6 +101,12 @@ export function DataTable<TData, TValue>({
             </div>
             <AuthorCombobox/>
         </div>
+         <div className="flex justify-between items-center mb-2 text-sm text-muted-foreground">
+            <div>
+                Showing <span className="font-medium">{table.getFilteredRowModel().rows.length}</span> of{' '}
+                <span className="font-medium">{table.getPreFilteredRowModel().rows.length}</span> entries
+            </div>
+        </div>
         <div className="rounded-md border">
         <Table>
             <TableHeader>

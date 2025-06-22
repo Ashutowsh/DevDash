@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Dialog, DialogHeader, DialogContent, DialogTitle } from './ui/dialog'
+import { Dialog, DialogHeader, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useProject } from '@/hooks/use-project'
-import { Input } from './ui/input'
 import { toast } from 'sonner'
-import { Button } from './ui/button'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 function InviteButton() {
     const {projectId} = useProject()

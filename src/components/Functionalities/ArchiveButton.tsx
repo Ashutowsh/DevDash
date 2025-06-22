@@ -1,7 +1,7 @@
 'use client'
 import { trpc } from '@/app/_trpc/client'
 import React from 'react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { useProject } from '@/hooks/use-project'
 import { toast } from 'sonner'
 import { useRefetch } from '@/hooks/use-refetch'

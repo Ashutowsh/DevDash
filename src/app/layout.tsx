@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { TRPCProvider } from "./_trpc/provider";
 import { Toaster } from "@/components/ui/sonner"
+import { ThemeProvider } from "@/components/Functionalities/theme-provider";
 
 
 
@@ -35,7 +36,13 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <TRPCProvider>
-            {children}
+            <ThemeProvider attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
             <Toaster />
           </TRPCProvider>
           

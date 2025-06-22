@@ -1,7 +1,19 @@
 'use client'
+
 import React from 'react'
-import { Sidebar, SidebarHeader, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton, SidebarMenu, useSidebar } from './ui/sidebar'
-import {sidebarItems } from '@/constants'
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenu,
+  useSidebar,
+} from './ui/sidebar'
+import { sidebarItems } from '@/constants'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
@@ -9,81 +21,94 @@ import { Button } from './ui/button'
 import { Plus } from 'lucide-react'
 import { useProject } from '@/hooks/use-project'
 
-
 export const AppSideBar = () => {
-    const pathname = usePathname()
-    const {open} = useSidebar()
-    const {projects, projectId, setProjectId} = useProject()
+  const pathname = usePathname()
+  const { open } = useSidebar()
+  const { projects, projectId, setProjectId } = useProject()
+
   return (
-    <div>
-      <Sidebar collapsible='icon' variant='floating'>
-        <SidebarHeader>
-            Logo
-        </SidebarHeader>
+    <Sidebar collapsible="icon" variant="floating" className="bg-muted/40 border-r border-border shadow-sm">
+      <SidebarHeader className="font-bold text-lg text-foreground px-4 py-2">
+        🚀 DevDash
+      </SidebarHeader>
 
-        <SidebarContent>
-            <SidebarGroup>
-                <SidebarGroupLabel>
-                    Application
-                </SidebarGroupLabel>
-            <SidebarGroupContent>
-                <SidebarMenu>
-                    {sidebarItems.map(item => (
-                        <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild>
-                                <Link href={item.url} className={cn({
-                                    'bg-primary text-white': pathname === item.url
-                                }, 'list-none')}>
-                                    <item.icon />
-                                    <span>{item.title}</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
-            </SidebarGroupContent>
-            </SidebarGroup>
+      <SidebarContent>
+        {/* App Nav */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground px-4">
+            Application
+          </SidebarGroupLabel>
 
-            <SidebarGroup>
-                <SidebarGroupLabel>
-                    Projects
-                </SidebarGroupLabel>
-                <SidebarGroupContent>
-                    <SidebarMenu>
-                        {projects?.map(project => (
-                            <SidebarMenuItem key={project.title}>
-                                <SidebarMenuButton asChild>
-                                    <div onClick={() => {
-                                        setProjectId(project.id)
-                                    }}>
-                                        <div className= {cn('rounded-sm border size-6 flex items-center justify-center text-sm bg-white text-primary', {
-                                            'bg-primary text-white': project.id === projectId
-                                        })}>
-                                            {project.title[0]}
-                                        </div>
-                                        <span>{project.title}</span>
-                                    </div>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sidebarItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      href={item.url}
+                      className={cn(
+                        'flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:bg-accent text-sm font-medium',
+                        pathname === item.url
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground'
+                      )}
+                    >
+                      <item.icon className="size-4" />
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-                        <div className='h-2'></div>
-                        <SidebarMenuItem>
-                            <Link href='/new-project'>
-                                <Button size = 'sm' variant = {'outline'} className='"w-fit'>
-                                    <Plus />
-                                    Create Project
-                        </Button>
-                            </Link>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarGroupContent>
-            </SidebarGroup>
+        {/* Project Switcher */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground px-4 mt-2">
+            Projects
+          </SidebarGroupLabel>
 
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projects?.map((project) => (
+                <SidebarMenuItem key={project.title}>
+                  <SidebarMenuButton asChild>
+                    <button
+                      onClick={() => setProjectId(project.id)}
+                      className={cn(
+                        'flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:bg-accent text-sm font-medium w-full', 'text-muted-foreground'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'flex h-6 w-6 items-center justify-center rounded-sm border bg-background text-xs font-semibold',
+                          project.id === projectId
+                            ? 'bg-primary text-primary-foreground'
+                            : 'border-border text-muted-foreground'
+                        )}
+                      >
+                        {project.title[0]}
+                      </div>
+                      <span className="truncate">{project.title}</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
 
-        </SidebarContent>
-
-      </Sidebar>
-    </div>
+              {/* Add project button */}
+              <SidebarMenuItem className="mt-4 px-3">
+                <Link href="/new-project" className="w-full">
+                  <Button size="sm" variant="outline" className="w-full justify-start">
+                    <Plus className="size-4 mr-2" />
+                    Create Project
+                  </Button>
+                </Link>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   )
 }

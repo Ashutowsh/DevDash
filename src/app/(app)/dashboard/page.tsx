@@ -1,55 +1,82 @@
 'use client'
 
-import ArchiveButton from '@/components/ArchiveButton'
-import AskQuestionCard from '@/components/AskQuestionCard'
-import CommitLogs from '@/components/CommitLogs'
-const InviteButton = dynamic(() => import('../../../components/InviteButton'), {ssr: false})
-import TeamMembers from '@/components/TeamMembers'
-import { useProject } from '@/hooks/use-project'
-import { ExternalLink, Github } from 'lucide-react'
+import React from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import React from 'react'
+import { Github, ExternalLink } from 'lucide-react'
+import ArchiveButton from '@/components/Functionalities/ArchiveButton'
+import AskQuestionCard from '@/components/AskQuestionCard'
+import CommitLogs from '@/components/Logs/CommitLogs'
+import TeamMembers from '@/components/Functionalities/Invite/TeamMembers'
+import { useProject } from '@/hooks/use-project'
+import { trpc } from '@/app/_trpc/client'
+
+// Dynamically import InviteButton
+const InviteButton = dynamic(() => import('@/components/Functionalities/Invite/InviteButton'), { ssr: false })
+
+// Import your new chart
+import { CommitPieChart } from '@/components/Charts/CommitsPieChart'
 
 function Dashboard() {
-  const {project} = useProject()
-  return (
-    <div>
-      <div className='flex items-center justify-between flex-wrap gap-y-4'>
-          <div className='w-fit rounded-md bg-primary px-4 py-3'>
-            <div className="flex items-center">
-              <Github className='size-5 text-white' />
-              <div className='ml-2'>
-                <p className='text-sm font-medium text-white'>
-                  This project is linked to {' '}
-                  <Link href={project?.githubUrl ?? ""} className='inline-flex items-center text-white/80 hover:underline'>
+  const { projectId, project } = useProject()
+  const { data: commits = [] } = trpc.getCommits.useQuery({ projectId })
 
+  return (
+    <div className="space-y-8 px-4 py-6 sm:px-8">
+      {/* Project GitHub Info */}
+      <div className="rounded-2xl border bg-muted/40 p-5 shadow-sm dark:border-white/10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="flex items-center justify-center rounded-md bg-primary p-2">
+              <Github className="h-5 w-5 text-white dark:text-black"/>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">
+                This project is linked to{' '}
+                <Link
+                  href={project?.githubUrl ?? '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
+                >
                   {project?.githubUrl}
-                  <ExternalLink className='ml-1 size-4 '/>
-                  </Link>
-                </p>
-              </div>
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </p>
             </div>
           </div>
 
-          <div className='h-4'></div>
-
-          <div className='flex items-center gap-4'>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <TeamMembers />
             <InviteButton />
             <ArchiveButton />
           </div>
         </div>
+      </div>
 
-        <div className="mt-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-            <AskQuestionCard />
-            MeetingCard
-          </div>
-        </div>
+    {/* Ask Question + Commit Chart */}
+    <div className="flex flex-col lg:flex-row items-center justify-center gap-24 w-full max-w-5xl mx-auto">
+      {/* Ask Question Card */}
+      <div className="w-full max-w-xl">
+        <AskQuestionCard />
+      </div>
 
-        <div className="mt-8"></div>
+      {/* Commit Pie Chart */}
+      <div className="w-full max-w-5xl">
+        <CommitPieChart
+          commits={
+            commits.map(c => ({
+              commitAuthorName: c.commitAuthorName
+            }))
+          }
+        />
+      </div>
+    </div>
+
+      {/* Commit Logs */}
+      <div>
         <CommitLogs />
+      </div>
     </div>
   )
 }
