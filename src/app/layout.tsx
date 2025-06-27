@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { TRPCProvider } from "./_trpc/provider";
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/Functionalities/theme-provider";
+import Script from "next/script";
 
 
 
@@ -41,6 +42,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
             >
+              <Script src="https://checkout.razorpay.com/v1/checkout.js"
+              strategy="lazyOnload"
+              />
               {children}
             </ThemeProvider>
             <Toaster />

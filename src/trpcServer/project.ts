@@ -118,6 +118,13 @@ export const appRouter = router({
         return prismaDb.usersToProjects.findMany({
             where: {projectId: input.projectId}, include: {user:true}
         })
+    }),
+
+    getMyCredits: protectedProcedures.query(async({ctx}) => {
+        return await prismaDb.user.findUnique({
+            where: {id: ctx.user.userId!},
+            select: {credits: true}
+        })
     })
 })
 

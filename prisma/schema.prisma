@@ -31,6 +31,8 @@ model User {
   UsersToProjects UsersToProjects[]
 
   Question Question[]
+
+  Transaction Transaction[]
 }
 
 model Project {
@@ -134,4 +136,14 @@ model CommitSecurityScan {
   severity   SecuritySeverity
   fileNames  String[]
   createdAt  DateTime @default(now())
+}
+
+model Transaction{
+  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  credits Int
 }
