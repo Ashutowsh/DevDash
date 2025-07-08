@@ -1,32 +1,52 @@
 'use client'
-import { trpc } from '@/app/_trpc/client'
-import React from 'react'
-import { Button } from '../ui/button'
-import { useProject } from '@/hooks/use-project'
+
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Archive } from 'lucide-react'
+import { trpc } from '@/app/_trpc/client'
+import { useProject } from '@/hooks/use-project'
 import { useRefetch } from '@/hooks/use-refetch'
 
-function ArchiveButton() {
-    const archiveProject = trpc.archiveProject.useMutation()
-    const {projectId} = useProject()
-    const refetch = useRefetch()
-  return (
-    <Button disabled = {archiveProject.isPending} size = 'sm' variant='destructive' onClick={() => {
-        const confirm = window.confirm("Are you sure, you want to archive this project?")
+const ArchiveProjectButton = () => {
+  const { projectId } = useProject()
+  const refetch = useRefetch()
 
-        if(confirm) archiveProject.mutate({projectId}, {
-            onSuccess: () => {
-                toast.success("project archived")
+  const archiveProject = trpc.archiveProject.useMutation()
+
+  const handleArchive = () => {
+    toast("Are you sure you want to archive this project?", {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Confirm",
+        onClick: () => {
+          archiveProject.mutate(
+            { projectId },
+            {
+              onSuccess: () => {
+                toast.success("Project archived successfully!")
                 refetch()
-            }, 
-            onError: () => {
-                toast.error("Failed to archive project")
+              },
+              onError: () => {
+                toast.error("Failed to archive the project.")
+              },
             }
-        })
-    }}>
-    Archive
+          )
+        },
+      },
+    })
+  }
+
+  return (
+    <Button
+      variant="destructive"
+      size="sm"
+      onClick={handleArchive}
+      disabled={archiveProject.isPending}
+    >
+      <Archive className="w-4 h-4 mr-2" />
+      {archiveProject.isPending ? 'Archiving...' : 'Archive Project'}
     </Button>
   )
 }
 
-export default ArchiveButton
+export default ArchiveProjectButton
