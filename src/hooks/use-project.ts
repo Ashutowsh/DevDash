@@ -4,7 +4,7 @@ import { useLocalStorage} from 'usehooks-ts'
 export const useProject = () => {
     const getProjects = trpc.getProjects.useQuery()
     const projects = getProjects.data
-    const [projectId, setProjectId] = useLocalStorage("GitHubAI-projectId", " ");
+    const [projectId, setProjectId] = useLocalStorage("DevDash-projectId", " ");
     const project = projects?.find(project => project.id === projectId)
     return {
         getProjects,

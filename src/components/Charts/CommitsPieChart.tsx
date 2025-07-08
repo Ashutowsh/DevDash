@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useTheme } from 'next-themes'
 
 type Commit = {
   commitAuthorName: string
@@ -33,6 +34,19 @@ const getCommitData = (commits: Commit[]) => {
   return Object.entries(authorMap).map(([name, value]) => ({ name, value }))
 }
 
+// 🧠 Custom Tooltip Component
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload?.length) {
+    const { name, value } = payload[0].payload
+    return (
+      <div className="rounded-md border border-border bg-background p-2 shadow-md text-foreground text-sm">
+        <strong>{name}</strong>: {value} commits
+      </div>
+    )
+  }
+  return null
+}
+
 export function CommitPieChart({ commits }: CommitPieChartProps) {
   const data = getCommitData(commits)
 
@@ -51,23 +65,11 @@ export function CommitPieChart({ commits }: CommitPieChartProps) {
             label={({ name, value }) => `${name}: ${value}`}
           >
             {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
 
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'var(--background)',
-              borderColor: 'var(--border)',
-              color: 'var(--foreground)',
-              borderRadius: '0.375rem',
-              padding: '0.5rem',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
 
           <Legend
             wrapperStyle={{

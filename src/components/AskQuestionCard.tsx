@@ -50,8 +50,7 @@ function AskQuestionCard() {
     <div>
       {/* Dialog for Answer Preview */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-[90vw] max-w-5xl sm:w-[80vw] sm:max-w-4xl md:w-[70vw] md:max-w-3xl 
-        max-h-[90vh] overflow-y-auto p-6 bg-background border-border shadow-lg">
+        <DialogContent className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[90vw] max-h-[90vh] overflow-y-auto p-6 bg-background border-border shadow-lg">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-lg sm:text-xl font-semibold">
               AI Answer Preview

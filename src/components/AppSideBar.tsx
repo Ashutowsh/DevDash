@@ -20,6 +20,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from './ui/button'
 import { Plus } from 'lucide-react'
 import { useProject } from '@/hooks/use-project'
+import { Logo } from './Logo'
 
 export const AppSideBar = () => {
   const pathname = usePathname()
@@ -29,7 +30,7 @@ export const AppSideBar = () => {
   return (
     <Sidebar collapsible="icon" variant="floating" className="bg-muted/40 border-r border-border shadow-sm">
       <SidebarHeader className="font-bold text-lg text-foreground px-4 py-2">
-        🚀 DevDash
+        {open && <Logo />}
       </SidebarHeader>
 
       <SidebarContent>

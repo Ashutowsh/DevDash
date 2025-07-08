@@ -3,10 +3,29 @@ import { protectedProcedures, router } from "./trpc";
 import prismaDb from "@/lib/prisma";
 import {pollCommits } from "@/lib/github";
 import { z } from "zod";
-import { indexGithubRepo } from "@/lib/gitInfo";
+import { checkCredits, indexGithubRepo } from "@/lib/gitInfo";
 
-export const appRouter = router({
+export const appRouter = router({    
     newProject: protectedProcedures.input(projectSchema).mutation(async({ctx, input}) => {
+
+        const user = await prismaDb.user.findUnique({
+            where: {
+                id: ctx.user.userId!
+            },
+            select: {credits: true}
+        })
+
+        if(!user) {
+            throw new Error('User not found')
+        }
+
+        const currentCredits = user.credits || 0
+        const fileCount = await checkCredits(input.githubUrl, input.githubToken)
+
+        if(currentCredits < fileCount) {
+            throw new Error('Insufficient credits')
+        }
+
         const project = await prismaDb.project.create({
             data: {
                 title: input.projectTitle,
@@ -23,6 +42,16 @@ export const appRouter = router({
         await indexGithubRepo(project.id, input.githubUrl, input.githubToken!)
         // await pollCommits(project.id)
         await pollCommits(project.id)
+        await prismaDb.user.update({
+            where: {
+                id: ctx.user.userId!
+            },
+            data: {
+                credits: {
+                    decrement: fileCount
+                }
+            }
+        })
 
         return project
     }),
@@ -68,6 +97,7 @@ export const appRouter = router({
     getQnAs : protectedProcedures.input(z.object({
         projectId: z.string()
     })).query(async({input}) => {
+        
         const qnAs = await prismaDb.question.findMany({
             where:{
                 projectId: input.projectId
@@ -88,6 +118,7 @@ export const appRouter = router({
         projectId: z.string()
     }))
     .query(async({ctx, input}) => {
+        await pollCommits(input.projectId).then().catch(console.error)
         const savedScan = await prismaDb.commitSecurityScan.findMany({
             where: {
                 projectId: input.projectId
@@ -125,7 +156,28 @@ export const appRouter = router({
             where: {id: ctx.user.userId!},
             select: {credits: true}
         })
+    }),
+
+    checkCredits: protectedProcedures.input(z.object({
+        githubUrl: z.string(),
+        githubToken: z.string().optional()
+    })).mutation(async({ctx, input}) => {
+        const fileCount = await checkCredits(input.githubUrl, input.githubToken)
+        const userCredits = await prismaDb.user.findUnique({
+            where: {
+                id:ctx.user.userId!
+            },
+            select: {
+                credits: true
+            }
+        })
+
+        return {
+            fileCount,
+            userCredits: userCredits?.credits || 0
+        }
     })
+    
 })
 
 export type AppRouter = typeof appRouter;

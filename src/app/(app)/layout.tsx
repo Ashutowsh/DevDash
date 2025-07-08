@@ -1,5 +1,6 @@
 import { AppSideBar } from '@/components/AppSideBar';
 import { ModeToggle } from '@/components/Functionalities/ModeButton';
+import { SidebarToggleButton } from '@/components/Functionalities/SideBarToggle';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { UserButton } from '@clerk/nextjs';
 
@@ -15,6 +16,7 @@ export default function AppLayout({
       <main className="flex-1 w-full p-4 sm:p-6 md:p-8">
         {/* Top Bar */}
         <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 shadow-sm px-4 py-2">
+           <SidebarToggleButton />
           {/* Optional: Search bar slot */}
           <div className="ml-auto flex items-center gap-2">
             <UserButton />
