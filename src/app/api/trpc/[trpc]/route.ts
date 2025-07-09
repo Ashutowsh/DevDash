@@ -1,42 +1,23 @@
 import { appRouter } from "@/trpcServer/project";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-
-const isAllowedOrigin = (origin: string): boolean => {
-  try {
-    const url = new URL(origin);
-    return (
-      url.hostname.endsWith(".vercel.app") ||
-      url.hostname === "localhost" ||         
-      url.hostname === "127.0.0.1" ||
-      url.hostname === process.env.PRODUCTION_DOMAIN
-    );
-  } catch {
-    return false;
-  }
-};
-
-const getCorsHeaders = (origin: string) => {
-  const allowOrigin = isAllowedOrigin(origin) ? origin : "";
-  return {
-    "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Credentials": "true",
-  };
+// ✅ Universal CORS headers — allow everyone
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  const origin = req.headers.get("origin") || "";
-  const corsHeaders = getCorsHeaders(origin);
-
+  // Handle preflight request
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders,
+      headers: CORS_HEADERS,
     });
   }
 
+  // Handle tRPC request
   const response = await fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
@@ -44,8 +25,9 @@ const handler = async (req: Request): Promise<Response> => {
     createContext: () => ({}),
   });
 
+  // Add CORS headers to response
   const headers = new Headers(response.headers);
-  Object.entries(corsHeaders).forEach(([key, value]) => {
+  Object.entries(CORS_HEADERS).forEach(([key, value]) => {
     headers.set(key, value);
   });
 
