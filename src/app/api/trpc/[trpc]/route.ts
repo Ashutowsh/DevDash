@@ -11,7 +11,6 @@ const ALLOWED_ORIGINS = [
   "https://your-app-name-*.vercel.app"
 ];
 
-// Add localhost for development
 if (process.env.NODE_ENV === "development") {
   ALLOWED_ORIGINS.push(
     "http://localhost:3000",
