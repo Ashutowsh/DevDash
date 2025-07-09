@@ -82,7 +82,7 @@ function QnABot() {
               <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                 File References
               </h3>
-              <RelatedCodes fileReferences={question.filesReferences ? (question.filesReferences as unknown as any[]) : []} />
+              <RelatedCodes fileReferences={question.filesReferences ?? [] as any} />
             </div>
           </div>
         </SheetContent>
