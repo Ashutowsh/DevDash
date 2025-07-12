@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 DevDash – AI-Powered Developer Dashboard
 
-## Getting Started
+DevDash is an AI-powered, GitHub-integrated developer dashboard designed to give engineering teams a centralized, intelligent view of their codebases. It enables deep code understanding, seamless team collaboration, and real-time insights — all in one modern, responsive interface.
 
-First, run the development server:
+## 🌐 Live Demo
+
+Coming soon...
+
+---
+
+## 🧠 Why DevDash?
+
+In modern development teams, understanding legacy codebases, tracking contributions, and navigating large repositories can be painful. DevDash combines **GitHub integration**, **AI reasoning**, and **visual insights** to bridge that gap — so your team can ship faster with confidence.
+
+---
+
+## 🔍 Core Features
+
+### ✅ GitHub Integration
+- Connect GitHub repositories securely
+- Fetches:
+  - Commit history
+  - Contributors
+  - Full source code (for AI indexing and Q&A)
+
+### 🤖 AI-Powered Q&A Assistant
+- Ask technical questions like:
+  - “Where is the login logic?”
+  - “What does the `useAuth` hook do?”
+- Streamed, Markdown-rendered answers
+- Includes:
+  - Referenced file summaries
+  - Related code file suggestions
+
+### 📊 Commit Visualization
+- Pie chart view of commits per author
+- Helps identify contribution patterns and team activity
+
+### 🛡️ Security Scan
+- Repository scanning for:
+  - Vulnerabilities
+  - Severity analysis
+- Visual indicators (e.g., charts, flags)
+
+### 💳 Billing & Credit System (Billing is off for some time )
+- **Credit-based system** (1 file indexed = 1 credit)
+- Custom slider to buy more credits
+- Real-time credit cost calculator
+- Billing page integrated with payment gateway *(Razorpay)*
+
+### 🧩 Multi-Project Support
+- Create & manage multiple projects
+- Sidebar switcher for seamless project context
+- No page reloads or route changes — fully client-side state management
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** [Next.js 14 (App Router)](https://nextjs.org/docs/app)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Backend Communication:** [tRPC](https://trpc.io/)
+- **Auth:** [Clerk.dev](https://clerk.dev/)
+- **Components:** [shadcn/ui](https://ui.shadcn.com/)
+- **Validation:** [Zod](https://zod.dev/)
+- **AI Q&A:** OpenAI / Gemini APIs *(Pluggable)*
+- **State Management:** Global project context
+- **Database:** PostgreSQL + Prisma
+- **Charts:** Recharts or similar for pie visualizations
+
+---
+
+## 🧾 Getting Started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/Ashutowsh/DevDash.git
+cd devdash
+bun run dev
